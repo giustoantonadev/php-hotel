@@ -12,6 +12,8 @@
 
 <body class="p-4">
 
+    <h1 class="mb-4 text-center">Elenco Hotel</h1>
+
     <?php
 
     $hotels = [
@@ -54,10 +56,27 @@
 
     ];
 
+    $parkingFilter = $_GET['parking'] ?? '';
+    $voteFilter = $_GET['vote'] ?? '';
+
+    $filteredHotels = $hotels;
+
+    if ($parkingFilter !== "") {
+        $filteredHotels = array_filter($filteredHotels, function ($hotel) use ($parkingFilter) {
+            return $hotel["parking"] == $parkingFilter;
+        });
+    }
+
+    if ($voteFilter !== "") {
+        $filteredHotels = array_filter($filteredHotels, function ($hotel) use ($voteFilter) {
+            return $hotel["vote"] >= $voteFilter;
+        });
+    }
+
     echo "<table class='table table-striped table-bordered'>";
     echo "<tr><th>Nome</th>  <th>Descrizione</th> <th>Parcheggio</th> <th>Voto</th> <th>Distanza dal centro (km)</th></tr>";
 
-    foreach ($hotels as $hotel) {
+    foreach ($filteredHotels as $hotel) {
         echo "<tr>";
         echo "<td>" . $hotel["name"] . "</td>";
         echo "<td>" . $hotel["description"] . "</td>";
@@ -71,5 +90,24 @@
 
     ?>
 
+
+    <form action="index.php" method="get" class="mt-4">
+        <div class="mb-3">
+            <label for="parking" class="form-label">Parcheggio:</label>
+            <select name="parking" id="parking" class="form-select">
+                <option value="">Tutti</option>
+                <option value="1" <?php if ($parkingFilter === '1') echo 'selected'; ?>>Sì</option>
+                <option value="0" <?php if ($parkingFilter === '0') echo 'selected'; ?>>No</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="vote" class="form-label">Voto minimo:</label>
+            <input type="number" name="vote" id="vote" class="form-control" min="1" max="5" value="<?php echo htmlspecialchars($voteFilter); ?>">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtra</button>
+
+    </form>
+
 </body>
+
 </html>
